@@ -13,7 +13,6 @@ public class JstanleyPokerSquaresPlayer implements PokerSquaresPlayer {
 	private Card[][] grid = new Card[SIZE][SIZE]; // grid with Card objects or null (for empty positions)
 	private int numPlays = 0; // number of Cards played into the grid so far
 	
-	
 	/**
 	 * Creates a Jstanley player with the default depth limit of 2.
 	 */
@@ -41,14 +40,14 @@ public class JstanleyPokerSquaresPlayer implements PokerSquaresPlayer {
 	 */
 	@Override
 	public void init() {
-		// TODO stuff
 		// clear grid
 		for(int row = 0; row < SIZE; row++) {
 			for(int col = 0; col < SIZE; col++) {
 				grid[row][col] = null;
 			}
 		}
-
+		
+		numPlays = 0; // reset numPlays
 	}
 
 	/* (non-Javadoc)
@@ -56,8 +55,9 @@ public class JstanleyPokerSquaresPlayer implements PokerSquaresPlayer {
 	 */
 	@Override
 	public int[] getPlay(Card card, long millisRemaining) {
-		// TODO Auto-generated method stub
-		return null;
+		int[] play = new int[2]; // the position that the card will ultimately be placed
+		
+		return play; // return the chose play
 	}
 
 	/* (non-Javadoc)
