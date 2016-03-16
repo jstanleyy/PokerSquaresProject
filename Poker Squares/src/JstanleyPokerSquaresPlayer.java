@@ -8,9 +8,25 @@ public class JstanleyPokerSquaresPlayer implements PokerSquaresPlayer {
 	private final int SIZE = 5; // number of rows/columns in square grid
 	private final int NUM_POS = SIZE * SIZE; // number of positions in square grid
 	private final int NUM_CARDS = Card.NUM_CARDS; // number of cards in deck
+	private int depthLimit = 2; // default depth limit
 	private PokerSquaresPointSystem system; // point system
 	private Card[][] grid = new Card[SIZE][SIZE]; // grid with Card objects or null (for empty positions)
 	private int numPlays = 0; // number of Cards played into the grid so far
+	
+	
+	/**
+	 * Creates a Jstanley player with the default depth limit of 2.
+	 */
+	public JstanleyPokerSquaresPlayer() {
+	}
+	
+	/**
+	 * Creates a Jstanley player with a specified depth limit.
+	 * @param depthIn The desired depth limit of the player.
+	 */
+	public JstanleyPokerSquaresPlayer(int depthIn) {
+		this.depthLimit = depthIn;
+	}
 	
 	/* (non-Javadoc)
 	 * @see PokerSquaresPlayer#setPointSystem(PokerSquaresPointSystem, long)
