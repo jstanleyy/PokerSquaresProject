@@ -57,6 +57,13 @@ public class JstanleyPokerSquaresPlayer implements PokerSquaresPlayer {
 	public int[] getPlay(Card card, long millisRemaining) {
 		int[] play = new int[2]; // the position that the card will ultimately be placed
 		
+		if (numPlays < 24) { // Not the last play
+			int remainingPlays = NUM_POS - numPlays;
+			
+		}
+		else { // Must be placed in the last open spot
+			
+		}
 		return play; // return the chose play
 	}
 
