@@ -12,6 +12,9 @@ public class JstanleyPokerSquaresPlayer implements PokerSquaresPlayer {
 	private PokerSquaresPointSystem system; // point system
 	private Card[][] grid = new Card[SIZE][SIZE]; // grid with Card objects or null (for empty positions)
 	private int numPlays = 0; // number of Cards played into the grid so far
+	private Card[] simDeck = Card.getAllCards(); // A list of all cards
+	private int[] plays = new int[NUM_POS];
+	private int[][] legalPlays = new int[NUM_POS][NUM_POS];
 	
 	/**
 	 * Creates a Jstanley player with the default depth limit of 2.
@@ -48,6 +51,11 @@ public class JstanleyPokerSquaresPlayer implements PokerSquaresPlayer {
 		}
 		
 		numPlays = 0; // reset numPlays
+		
+		// (re)initialize list of play positions (row-major ordering)
+		for(int i = 0; i < NUM_POS; i++) {
+			plays[i] = i;
+		}
 	}
 
 	/* (non-Javadoc)
@@ -55,16 +63,55 @@ public class JstanleyPokerSquaresPlayer implements PokerSquaresPlayer {
 	 */
 	@Override
 	public int[] getPlay(Card card, long millisRemaining) {
-		int[] play = new int[2]; // the position that the card will ultimately be placed
+		
+		// Match simDeck to actual play event. So, from index numPlays on, is a list of undealt cards
+		int cardIndex = numPlays;
+		while(card.equals(simDeck[cardIndex])) {
+			cardIndex++;
+		}
+		simDeck[cardIndex] = simDeck[numPlays];
+		simDeck[numPlays] = card;
 		
 		if (numPlays < 24) { // Not the last play
-			int remainingPlays = NUM_POS - numPlays;
+			int remainingPlays = NUM_POS - numPlays; // Number of plays remaining
+			// Copies the play positions that are empty
+			System.arraycopy(plays, numPlays, legalPlays[numPlays], 0, remainingPlays);
 			
 		}
-		else { // Must be placed in the last open spot
-			
+		
+		// the position that the card will ultimately be placed
+		int[] playPos = { plays[numPlays] / SIZE, plays[numPlays] % SIZE };
+		makePlay(card, playPos[0], playPos[1]);
+		return playPos; // return the chose play
+	}
+	
+	/**
+	 * This method updates the global variables to reflect the chosen play.
+	 * @param card The card to be played.
+	 * @param row The row in which the card is to be placed.
+	 * @param col The column in which the card is to be placed
+	 */
+	private void makePlay(Card card, int row, int col) {
+		
+		// Match simDeck to event
+		int cardIndex = numPlays;
+		while(!card.equals(simDeck[cardIndex])) {
+			cardIndex++;
 		}
-		return play; // return the chose play
+		simDeck[cardIndex] = simDeck[numPlays];
+		simDeck[numPlays] = card;
+		
+		// Update grid and plays to reflect the chosen play
+		grid[row][col] = card;
+		int play = row * SIZE + col;
+		int j = 0;
+		while(plays[j] != play) {
+			j++;
+		}
+		plays[j] = plays[numPlays];
+		plays[numPlays] = play;
+		
+		numPlays++; // Increment numPlays by 1
 	}
 
 	/* (non-Javadoc)
