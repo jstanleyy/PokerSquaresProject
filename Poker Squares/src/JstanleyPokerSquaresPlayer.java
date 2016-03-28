@@ -79,11 +79,26 @@ public class JstanleyPokerSquaresPlayer implements PokerSquaresPlayer {
 			int remainingPlays = NUM_POS - numPlays; // Number of plays remaining
 			// Copies the play positions that are empty
 			System.arraycopy(plays, numPlays, legalPlays[numPlays], 0, remainingPlays);
-			ArrayList<Integer> bestPlays = new ArrayList<Integer>(); // All plays that yield the highest minimax score 
+			ArrayList<Integer> bestPlays = new ArrayList<Integer>(); // All plays that yield the highest minimax value
+			double maxScore = Double.NEGATIVE_INFINITY; // Max score found so far
 			
 			for(int i = 0; i < remainingPlays; i++) {
-				//TODO: Sim to depth limit and use evaluation function to determine the minimax score
 				
+				int play = legalPlays[numPlays][i];
+				this.makePlay(card, play / SIZE, play % SIZE); // Plays the card at the current position
+				
+				int nodeValue = getValue(depthLimit); // Gets expectiminimax value of this move
+				
+				this.undoPlay(); // Undoes the current play
+				
+				// Update (if necessary) the maximum score and the list of best plays
+				if(nodeValue >= maxScore) {
+					if(nodeValue > maxScore) {
+						bestPlays.clear();
+					}
+					bestPlays.add(play);
+					maxScore = nodeValue;
+				}
 			}
 			 
 			int bestPlay = bestPlays.get(random.nextInt(bestPlays.size())); // Chooses the best play
@@ -97,8 +112,24 @@ public class JstanleyPokerSquaresPlayer implements PokerSquaresPlayer {
 		
 		// the position that the card will ultimately be placed
 		int[] playPos = { plays[numPlays] / SIZE, plays[numPlays] % SIZE };
-		makePlay(card, playPos[0], playPos[1]);
+		makePlay(card, playPos[0], playPos[1]); // Makes the chosen play without undoing it
 		return playPos; // return the chose play
+	}
+	
+	/**
+	 * @param depthIn
+	 * @return 
+	 */
+	private int getValue(int depthIn) {
+		int score = 0;
+		
+		if(depthIn == 0) {
+			score = evaluateGrid();
+		}
+		else {
+			//TODO: Sim to depth limit and use evaluation function to determine the minimax value
+		}
+		return score;
 	}
 	
 	/**
@@ -108,8 +139,10 @@ public class JstanleyPokerSquaresPlayer implements PokerSquaresPlayer {
 	 */
 	private int evaluateGrid() {
 		int score = 0;
+		//TODO: Design an evaluation function
 		return score;
 	}
+	
 	/**
 	 * This method updates the global variables to reflect the chosen play.
 	 * @param card The card to be played.
