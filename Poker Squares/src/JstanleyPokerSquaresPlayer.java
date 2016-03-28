@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+import java.util.Random;
 
 /**
  * @author jstanley
@@ -15,6 +17,7 @@ public class JstanleyPokerSquaresPlayer implements PokerSquaresPlayer {
 	private Card[] simDeck = Card.getAllCards(); // A list of all cards
 	private int[] plays = new int[NUM_POS];
 	private int[][] legalPlays = new int[NUM_POS][NUM_POS];
+	private Random random = new Random(); // A random number generator for breaking minimax score ties
 	
 	/**
 	 * Creates a Jstanley player with the default depth limit of 2.
@@ -76,7 +79,20 @@ public class JstanleyPokerSquaresPlayer implements PokerSquaresPlayer {
 			int remainingPlays = NUM_POS - numPlays; // Number of plays remaining
 			// Copies the play positions that are empty
 			System.arraycopy(plays, numPlays, legalPlays[numPlays], 0, remainingPlays);
+			ArrayList<Integer> bestPlays = new ArrayList<Integer>(); // All plays that yield the highest minimax score 
 			
+			for(int i = 0; i < remainingPlays; i++) {
+				//TODO: Sim to depth limit and use evaluation function to determine the minimax score
+				
+			}
+			 
+			int bestPlay = bestPlays.get(random.nextInt(bestPlays.size())); // Chooses the best play
+			// Update our list of plays, recording the chosen play in its sequential position; all onward from numPlays are empty positions
+			int bestPlayIndex = numPlays;
+			while (plays[bestPlayIndex] != bestPlay)
+				bestPlayIndex++;
+			plays[bestPlayIndex] = plays[numPlays];
+			plays[numPlays] = bestPlay;
 		}
 		
 		// the position that the card will ultimately be placed
@@ -85,6 +101,15 @@ public class JstanleyPokerSquaresPlayer implements PokerSquaresPlayer {
 		return playPos; // return the chose play
 	}
 	
+	/**
+	 * This method will calculate and return the current score of the grid by using the
+	 * evaluation function that I designed.
+	 * @return The current score of the grid based of the evaluation function.
+	 */
+	private int evaluateGrid() {
+		int score = 0;
+		return score;
+	}
 	/**
 	 * This method updates the global variables to reflect the chosen play.
 	 * @param card The card to be played.
@@ -112,6 +137,15 @@ public class JstanleyPokerSquaresPlayer implements PokerSquaresPlayer {
 		plays[numPlays] = play;
 		
 		numPlays++; // Increment numPlays by 1
+	}
+	
+	/**
+	 * Undoes the previous play.
+	 */
+	private void undoPlay() {
+		numPlays--;
+		int play = plays[numPlays];
+		grid[play / SIZE][play % SIZE] = null;
 	}
 
 	/* (non-Javadoc)
