@@ -10,14 +10,12 @@ public class JstanleyPokerSquaresPlayer implements PokerSquaresPlayer {
 	private final int SIZE = 5; // number of rows/columns in square grid
 	private final int NUM_POS = SIZE * SIZE; // number of positions in square grid
 	private final int NUM_CARDS = Card.NUM_CARDS; // number of cards in deck
-	private int depthLimit = 2; // default depth limit
 	private PokerSquaresPointSystem system; // point system
 	private Card[][] grid = new Card[SIZE][SIZE]; // grid with Card objects or null (for empty positions)
 	private int numPlays = 0; // number of Cards played into the grid so far
-	private Card[] simDeck = Card.getAllCards(); // A list of all cards
 	private int[] plays = new int[NUM_POS];
-	private int[][] legalPlays = new int[NUM_POS][NUM_POS];
 	private Random random = new Random(); // A random number generator for breaking minimax score ties
+	private final int OTHER_COL = 4;
 	
 	/**
 	 * Creates a Jstanley player with the default depth limit of 2.
@@ -30,7 +28,6 @@ public class JstanleyPokerSquaresPlayer implements PokerSquaresPlayer {
 	 * @param depthIn The desired depth limit of the player.
 	 */
 	public JstanleyPokerSquaresPlayer(int depthIn) {
-		this.depthLimit = depthIn;
 	}
 	
 	/* (non-Javadoc)
@@ -66,37 +63,59 @@ public class JstanleyPokerSquaresPlayer implements PokerSquaresPlayer {
 	 */
 	@Override
 	public int[] getPlay(Card card, long millisRemaining) {
-		int[] play = null;
+		int[] play;
+		int suit = card.getSuit();
+		
+		if(isColFull(suit)) {
+			if(isColFull(OTHER_COL)) {
+				boolean done = false;
+				int col = 0;
+				while(!done) {
+					if(isColFull(col)) {
+						col++;
+					}
+					else {
+						done = true;
+					}
+				}
+				play = makePlay(card, col);
+			}
+			else {
+				play = makePlay(card, OTHER_COL);
+			}
+		}
+		else {
+			play = makePlay(card, suit);
+		}
+		
+		return play;
+	}
+
+	private int[] makePlay(Card card, int col) {
+		boolean done = false;
+		int row = 0;
+		while(!done) {
+			if(grid[row][col] == null) {
+				grid[row][col] = card;
+				numPlays++;
+				done = true;
+			}
+			else {
+				row++;
+			}
+		}
+		int[] play = {row, col};
 		return play;
 	}
 	
-	/**
-	 * This method updates the global variables to reflect the chosen play.
-	 * @param card The card to be played.
-	 * @param row The row in which the card is to be placed.
-	 * @param col The column in which the card is to be placed
-	 */
-	private void makePlay(Card card, int row, int col) {
-		
-		// Match simDeck to event
-		int cardIndex = numPlays;
-		while(!card.equals(simDeck[cardIndex])) {
-			cardIndex++;
+	private boolean isColFull(int col) {
+		boolean res = true;
+		for(int i = 0; i < grid.length; i++) {
+			if(grid[i][col] == null) {
+				res = false;
+			}
 		}
-		simDeck[cardIndex] = simDeck[numPlays];
-		simDeck[numPlays] = card;
-		
-		// Update grid and plays to reflect the chosen play
-		grid[row][col] = card;
-		int play = row * SIZE + col;
-		int j = 0;
-		while(plays[j] != play) {
-			j++;
-		}
-		plays[j] = plays[numPlays];
-		plays[numPlays] = play;
-		
-		numPlays++; // Increment numPlays by 1
+		return res;	
 	}
 
 	/* (non-Javadoc)
@@ -113,8 +132,12 @@ public class JstanleyPokerSquaresPlayer implements PokerSquaresPlayer {
 	 */
 	public static void main(String[] args) {
 		PokerSquaresPointSystem system = PokerSquaresPointSystem.getAmericanPointSystem();
+		//System.out.println(system);
+		//new PokerSquares(new JstanleyPokerSquaresPlayer(), system ).play();
+		
+		System.out.println("\n\nBatch game demo:");
 		System.out.println(system);
-		new PokerSquares(new JstanleyPokerSquaresPlayer(), system ).play();
+		new PokerSquares(new JstanleyPokerSquaresPlayer(), system).playSequence(10, 10000, false);
 	}
 
 }
