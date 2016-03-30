@@ -66,91 +66,8 @@ public class JstanleyPokerSquaresPlayer implements PokerSquaresPlayer {
 	 */
 	@Override
 	public int[] getPlay(Card card, long millisRemaining) {
-		
-		// Match simDeck to actual play event. So, from index numPlays on, is a list of undealt cards
-		int cardIndex = numPlays;
-		while(card.equals(simDeck[cardIndex])) {
-			cardIndex++;
-		}
-		simDeck[cardIndex] = simDeck[numPlays];
-		simDeck[numPlays] = card;
-		
-		if (numPlays < 24) { // Not the last play
-			int remainingPlays = NUM_POS - numPlays; // Number of plays remaining
-			// Copies the play positions that are empty
-			System.arraycopy(plays, numPlays, legalPlays[numPlays], 0, remainingPlays);
-			ArrayList<Integer> bestPlays = new ArrayList<Integer>(); // All plays that yield the highest minimax value
-			double maxScore = Double.NEGATIVE_INFINITY; // Max score found so far
-			
-			for(int i = 0; i < remainingPlays; i++) {
-				
-				int play = legalPlays[numPlays][i];
-				this.makePlay(card, play / SIZE, play % SIZE); // Plays the card at the current position
-				
-				int nodeValue = getValue(depthLimit); // Gets expectiminimax value of this move
-				
-				this.undoPlay(); // Undoes the current play
-				
-				// Update (if necessary) the maximum score and the list of best plays
-				if(nodeValue >= maxScore) {
-					if(nodeValue > maxScore) {
-						bestPlays.clear();
-					}
-					bestPlays.add(play);
-					maxScore = nodeValue;
-				}
-			}
-			 
-			int bestPlay = bestPlays.get(random.nextInt(bestPlays.size())); // Chooses the best play
-			// Update our list of plays, recording the chosen play in its sequential position; all onward from numPlays are empty positions
-			int bestPlayIndex = numPlays;
-			while (plays[bestPlayIndex] != bestPlay)
-				bestPlayIndex++;
-			plays[bestPlayIndex] = plays[numPlays];
-			plays[numPlays] = bestPlay;
-		}
-		
-		// the position that the card will ultimately be placed
-		int[] playPos = { plays[numPlays] / SIZE, plays[numPlays] % SIZE };
-		makePlay(card, playPos[0], playPos[1]); // Makes the chosen play without undoing it
-		return playPos; // return the chose play
-	}
-	
-	/**
-	 * @param depthIn
-	 * @return 
-	 */
-	private int getValue(int depthIn) {
-		int score = 0;
-		
-		if(depthIn == 0) {
-			score = evaluateGrid();
-		}
-		else {
-			//TODO: Sim to depth limit and use evaluation function to determine the minimax value
-			int depth = Math.min(depthIn, NUM_POS - numPlays); // Real depth limit taking into account the game status
-			
-			for(int d = 0; d < depth; d++) {
-				
-				// Generate a random card;
-				int c = random.nextInt(NUM_CARDS - numPlays) + numPlays;
-				Card card = this.simDeck[c];
-				
-				
-			}
-		}
-		return score;
-	}
-	
-	/**
-	 * This method will calculate and return the current score of the grid by using the
-	 * evaluation function that I designed.
-	 * @return The current score of the grid based of the evaluation function.
-	 */
-	private int evaluateGrid() {
-		int score = 0;
-		//TODO: Design an evaluation function
-		return score;
+		int[] play = null;
+		return play;
 	}
 	
 	/**
@@ -180,15 +97,6 @@ public class JstanleyPokerSquaresPlayer implements PokerSquaresPlayer {
 		plays[numPlays] = play;
 		
 		numPlays++; // Increment numPlays by 1
-	}
-	
-	/**
-	 * Undoes the previous play.
-	 */
-	private void undoPlay() {
-		numPlays--;
-		int play = plays[numPlays];
-		grid[play / SIZE][play % SIZE] = null;
 	}
 
 	/* (non-Javadoc)
