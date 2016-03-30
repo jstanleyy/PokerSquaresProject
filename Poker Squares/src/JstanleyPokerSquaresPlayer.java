@@ -128,6 +128,16 @@ public class JstanleyPokerSquaresPlayer implements PokerSquaresPlayer {
 		}
 		else {
 			//TODO: Sim to depth limit and use evaluation function to determine the minimax value
+			int depth = Math.min(depthIn, NUM_POS - numPlays); // Real depth limit taking into account the game status
+			
+			for(int d = 0; d < depth; d++) {
+				
+				// Generate a random card;
+				int c = random.nextInt(NUM_CARDS - numPlays) + numPlays;
+				Card card = this.simDeck[c];
+				
+				
+			}
 		}
 		return score;
 	}
