@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.Random;
 
 /**
@@ -7,6 +8,7 @@ import java.util.Random;
 public class JstanleyPokerSquaresPlayer implements PokerSquaresPlayer {
 
 	private final int SIZE = 5; // number of rows/columns in square grid
+	@SuppressWarnings("unused")
 	private PokerSquaresPointSystem system; // point system
 	private Card[][] grid = new Card[SIZE][SIZE]; // grid with Card objects or null (for empty positions)
 	private final int OTHER_COL = 4;
@@ -37,46 +39,55 @@ public class JstanleyPokerSquaresPlayer implements PokerSquaresPlayer {
 	 */
 	@Override
 	public int[] getPlay(Card card, long millisRemaining) {
-		int[] play; // The play to be returned
-		int suit = card.getSuit(); // Used for placing the card in a specific column
+		int suit = card.getSuit(), col; // Used for placing the card in a specific column
 		
-		// If the column for that suit is full, place in the extra cards column
-		if(isColFull(suit)) {
-			// If the extra cards column is full, place in the column with the most free space
-			if(isColFull(this.OTHER_COL)) {
-				play = makePlay(card, this.emptiestCol()); // Places the card in the column with the most empty spaces
-			}
-			else {
-				play = makePlay(card, this.OTHER_COL); // Places the card in the first open slot in the extra column
-			}
-		}
-		else {
-			play = makePlay(card, suit); // Places the card in the first open slot in that suits column
-		}
+		if(isColFull(suit) && isColFull(this.OTHER_COL)) // Both the suits column and extra cards column is full
+			col = this.getEmptiestCol(); // The card will placed in the least full column
+		else if(isColFull(suit))
+			col = this.OTHER_COL; // The card will placed in the extra column 
+		else
+			col = suit; // The card will placed in the corresponding column depending on its suit
 		
+		int row = getHighestOccurrence(card.getRank(), col); // The card will be placed in the row with the most occurrences of it's rank
+		
+		grid[row][col] = card; // Updates the grid to reflect the move
+		int[] play = {row, col};
 		return play; // Returns the chosen play
 	}
-
+	
 	/**
-	 * This method finds the first open space in the given column, and updates the grid to reflect that move.
-	 * @param card The card to be place.
+	 * This method will return the row with the highest occurrence of the inputed value.
+	 * @param val The value to be compared to.
 	 * @param col The column that the card will be placed in.
-	 * @return An array containing the chosen row and column.
+	 * @return The row with the highest occurrence of the inputed value.
 	 */
-	private int[] makePlay(Card card, int col) {
-		boolean done = false;
-		int row = 0;
-		while(!done) {
-			if(grid[row][col] == null) {
-				grid[row][col] = card;
-				done = true;
-			}
-			else {
-				row++;
+	private int getHighestOccurrence(int val, int col) {
+		
+		// Get the empty positions in that column
+		ArrayList<Integer> emptyPositions = new ArrayList<Integer>();
+		for(int i = 0; i < SIZE; i++) {
+			if(grid[i][col] == null) {
+				emptyPositions.add(i);
 			}
 		}
-		int[] play = {row, col};
-		return play;
+		
+		int row = 0, maxRow = Integer.MIN_VALUE;
+		
+		for(int i : emptyPositions) { // For each empty position in col
+			int res = 0; // Keeps track of the occurrences of the value in the row
+			for(int j = 0; j < SIZE; j++) { // Loops through each column
+				if(grid[i][j] != null && grid[i][j].getRank() == val) {
+					res++;
+				}
+			}
+			
+			// Keeps track of the row with the highest occurrence
+			if(res > maxRow) {
+				maxRow = res;
+				row = i;
+			}
+		}
+		return row;
 	}
 	
 	/**
@@ -98,7 +109,7 @@ public class JstanleyPokerSquaresPlayer implements PokerSquaresPlayer {
 	 * This method returns the column with the most empty positions.
 	 * @return The column with the most empty positions
 	 */
-	private int emptiestCol() {
+	private int getEmptiestCol() {
 		int col = 0, min = Integer.MIN_VALUE;
 		
 		for(int i = 0; i < SIZE; i++) { // Loop through each column
@@ -132,12 +143,10 @@ public class JstanleyPokerSquaresPlayer implements PokerSquaresPlayer {
 	 */
 	public static void main(String[] args) {
 		PokerSquaresPointSystem system = PokerSquaresPointSystem.getAmericanPointSystem();
-		//System.out.println(system);
-		//new PokerSquares(new JstanleyPokerSquaresPlayer(), system ).play();
 		Random random = new Random();
 		System.out.println("\n\nBatch game demo:");
 		System.out.println(system);
-		new PokerSquares(new JstanleyPokerSquaresPlayer(), system).playSequence(1000, random.nextLong(), false);
+		new PokerSquares(new JstanleyPokerSquaresPlayer(), system).playSequence(10000, random.nextLong(), false);
 	}
 
 }
