@@ -98,7 +98,7 @@ public class JstanleyPokerSquaresPlayer implements PokerSquaresPlayer {
 	 * This method returns the column with the most empty positions.
 	 * @return The column with the most empty positions
 	 */
-	public int emptiestCol() {
+	private int emptiestCol() {
 		int col = 0, min = Integer.MIN_VALUE;
 		
 		for(int i = 0; i < SIZE; i++) { // Loop through each column
