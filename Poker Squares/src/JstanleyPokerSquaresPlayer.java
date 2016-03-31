@@ -1,4 +1,3 @@
-import java.util.ArrayList;
 import java.util.Random;
 
 /**
@@ -8,10 +7,8 @@ import java.util.Random;
 public class JstanleyPokerSquaresPlayer implements PokerSquaresPlayer {
 
 	private final int SIZE = 5; // number of rows/columns in square grid
-	private final int NUM_POS = SIZE * SIZE; // number of positions in square grid
 	private PokerSquaresPointSystem system; // point system
 	private Card[][] grid = new Card[SIZE][SIZE]; // grid with Card objects or null (for empty positions)
-	private Random random = new Random(); // A random number generator for breaking minimax score ties
 	private final int OTHER_COL = 4;
 	
 	/* (non-Javadoc)
@@ -45,23 +42,12 @@ public class JstanleyPokerSquaresPlayer implements PokerSquaresPlayer {
 		
 		// If the column for that suit is full, place in the extra cards column
 		if(isColFull(suit)) {
-			// If the extra cards column is full, place in the first open column
-			if(isColFull(OTHER_COL)) {
-				// Loops to find the first column with a free space
-				boolean done = false;
-				int col = 0;
-				while(!done) {
-					if(isColFull(col)) {
-						col++;
-					}
-					else {
-						done = true;
-					}
-				}
-				play = makePlay(card, col); // Places the card in that column
+			// If the extra cards column is full, place in the column with the most free space
+			if(isColFull(this.OTHER_COL)) {
+				play = makePlay(card, this.emptiestCol()); // Places the card in the column with the most empty spaces
 			}
 			else {
-				play = makePlay(card, OTHER_COL); // Places the card in the first open slot in the extra column
+				play = makePlay(card, this.OTHER_COL); // Places the card in the first open slot in the extra column
 			}
 		}
 		else {
@@ -107,6 +93,30 @@ public class JstanleyPokerSquaresPlayer implements PokerSquaresPlayer {
 		}
 		return res;	
 	}
+	
+	/**
+	 * This method returns the column with the most empty positions.
+	 * @return The column with the most empty positions
+	 */
+	public int emptiestCol() {
+		int col = 0, min = Integer.MIN_VALUE;
+		
+		for(int i = 0; i < SIZE; i++) { // Loop through each column
+			int total = 0;
+			for(int j = 0; j < SIZE; j++) { // Loop through each row
+				if(grid[j][i] == null) {
+					total++;
+				}
+			}
+			
+			if(total > min) { // Keep track of the column with the most empty positions
+				min = total;
+				col = i;
+			}
+		}
+		
+		return col; // Returns that column
+	}
 
 	/* (non-Javadoc)
 	 * @see PokerSquaresPlayer#getName()
@@ -124,10 +134,10 @@ public class JstanleyPokerSquaresPlayer implements PokerSquaresPlayer {
 		PokerSquaresPointSystem system = PokerSquaresPointSystem.getAmericanPointSystem();
 		//System.out.println(system);
 		//new PokerSquares(new JstanleyPokerSquaresPlayer(), system ).play();
-		
+		Random random = new Random();
 		System.out.println("\n\nBatch game demo:");
 		System.out.println(system);
-		new PokerSquares(new JstanleyPokerSquaresPlayer(), system).playSequence(10, 0, false);
+		new PokerSquares(new JstanleyPokerSquaresPlayer(), system).playSequence(1000, random.nextLong(), false);
 	}
 
 }
